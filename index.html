@@ -237,11 +237,32 @@
         message.textContent = "Yay! See you on Valentine's Day <3";
       };
 
-      // Track mouse movement on entire document to make it impossible to hover
-      document.addEventListener("mousemove", keepAwayFromCursor);
-      
-      // Also track on button area for extra safety
-      buttonArea.addEventListener("mousemove", keepAwayFromCursor);
+      let currentMouseX = 0;
+      let currentMouseY = 0;
+
+      // Track current mouse position
+      document.addEventListener("mousemove", (e) => {
+        currentMouseX = e.clientX;
+        currentMouseY = e.clientY;
+      });
+
+      // Continuously check distance using requestAnimationFrame for instant response
+      function checkProximity() {
+        const now = Date.now();
+        if (now - lastMoveTime >= moveThrottle) {
+          const btnRect = noBtn.getBoundingClientRect();
+          const btnCenterX = btnRect.left + btnRect.width / 2;
+          const btnCenterY = btnRect.top + btnRect.height / 2;
+          const distance = Math.hypot(btnCenterX - currentMouseX, btnCenterY - currentMouseY);
+
+          if (distance < 150) {
+            lastMoveTime = now;
+            moveNoButton();
+          }
+        }
+        requestAnimationFrame(checkProximity);
+      }
+      checkProximity();
 
       noBtn.addEventListener("mouseenter", moveNoButton);
       noBtn.addEventListener("touchstart", (event) => {
